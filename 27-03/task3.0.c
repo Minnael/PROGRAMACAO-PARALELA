@@ -1,19 +1,18 @@
-#include <iostream>
-#include <vector>
-#include <cmath>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include <omp.h>
 
 #define N 100000000  // Tamanho do vetor (memory-bound)
 #define ITER 10000000 // Iterações para cálculo de PI (compute-bound)
 
-using namespace std;
-
 // Função memory-bound: Soma de vetores
 void memory_bound(int num_threads) {
-    vector<double> A(N), B(N), C(N);
+    double *A = (double *)malloc(N * sizeof(double));
+    double *B = (double *)malloc(N * sizeof(double));
+    double *C = (double *)malloc(N * sizeof(double));
     
     // Inicializa os vetores
-    #pragma omp parallel for num_threads(num_threads)
     for (int i = 0; i < N; i++) {
         A[i] = i * 1.0;
         B[i] = (N - i) * 1.0;
@@ -27,7 +26,9 @@ void memory_bound(int num_threads) {
     }
     
     double end = omp_get_wtime();
-    cout << "Memory-bound (" << num_threads << " threads): " << (end - start) << " seconds\n";
+    printf("Memory-bound (%d threads): %.6f seconds\n", num_threads, end - start);
+    
+    free(A); free(B); free(C);
 }
 
 // Função compute-bound: Aproximação de Pi com a série de Leibniz
@@ -43,19 +44,20 @@ double compute_bound(int num_threads) {
     }
     
     double end = omp_get_wtime();
-    cout << "Compute-bound (" << num_threads << " threads): " << (end - start) << " seconds\n";
+    printf("Compute-bound (%d threads): %.6f seconds\n", num_threads, end - start);
     
     return pi * 4;
 }
 
 int main() {
-    vector<int> thread_counts = {1, 2, 4, 8, 16}; // Testando diferentes números de threads
+    int thread_counts[] = {1, 2, 4, 8, 16}; // Testando diferentes números de threads
     
-    for (int threads : thread_counts) {
+    for (int i = 0; i < 5; i++) {
+        int threads = thread_counts[i];
         memory_bound(threads);
         double pi_aprox = compute_bound(threads);
-        cout << "Pi aproximado (" << threads << " threads): " << pi_aprox << endl;
-        cout << "-----------------------------------" << endl;
+        printf("Pi aproximado (%d threads): %.15f\n", threads, pi_aprox);
+        printf("-----------------------------------\n");
     }
     
     return 0;

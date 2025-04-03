@@ -11,13 +11,13 @@ tempos_colunas_ms = [t / 1e6 for t in tempos_colunas_ns]
 
 # Criando o gráfico
 plt.figure(figsize=(10, 6))
-plt.plot(tamanhos, tempos_linhas_ms, marker='o', linestyle='-', label='Acesso por Linhas')
-plt.plot(tamanhos, tempos_colunas_ms, marker='s', linestyle='-', label='Acesso por Colunas')
+plt.plot(tamanhos, tempos_linhas_ms, marker='o', linestyle='-', label='Multiplicação (Acesso por Linhas)')
+plt.plot(tamanhos, tempos_colunas_ms, marker='s', linestyle='-', label='Multiplicação (Acesso por Colunas)')
 
 # Personalizando o gráfico
 plt.xlabel("Tamanho da Matriz (NxN)")
 plt.ylabel("Tempo (ms)")
-plt.title("Tempo de Acesso à Matriz vs. Tamanho da Matriz")
+plt.title("Tempo de Multiplicação de Matriz por Vetor vs. Tamanho da Matriz")
 plt.legend()
 plt.grid(True)
 
