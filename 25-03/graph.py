@@ -1,25 +1,25 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Dados sem os dois primeiros elementos
-tamanhos = [10**6, 10**7, 10**8, 2*10**8, 3*10**8, 4*10**8]
+# Novos dados
+tamanhos = [10**6, 10**7, 10**8, 2*10**8, 3*10**8]
 
 tempos_O0 = {
-    "Inicializacao": [9, 62, 581, 656, 984, 1357],
-    "Com Dependencia": [10, 63, 639, 731, 1101, 1523],
-    "Sem Dependencia": [11, 57, 560, 653, 972, 1296]
+    "Inicializacao": [2, 24, 231, 574, 704],
+    "Com Dependencia": [3, 24, 249, 603, 763],
+    "Sem Dependencia": [2, 25, 200, 433, 619]
 }
 
 tempos_O2 = {
-    "Inicializacao": [2, 15, 66, 117, 119, 160],
-    "Com Dependencia": [2, 20, 98, 192, 172, 228],
-    "Sem Dependencia": [4, 21, 164, 317, 294, 384]
+    "Inicializacao": [0, 3, 34, 68, 96],
+    "Com Dependencia": [0, 5, 35, 70, 102],
+    "Sem Dependencia": [1, 5, 36, 72, 104]
 }
 
 tempos_O3 = {
-    "Inicializacao": [1, 17, 66, 121, 119, 159],
-    "Com Dependencia": [2, 26, 98, 193, 174, 229],
-    "Sem Dependencia": [3, 44, 162, 312, 288, 395]
+    "Inicializacao": [0, 3, 33, 65, 98],
+    "Com Dependencia": [0, 4, 34, 69, 101],
+    "Sem Dependencia": [0, 5, 35, 73, 104]
 }
 
 def format_label(value):
@@ -29,12 +29,12 @@ def format_label(value):
 
 def plot_bar_chart(tamanhos, tempos, title):
     x = np.arange(len(tamanhos))
-    width = 0.2  # Reduzindo a largura das barras
+    width = 0.2  # Largura das barras
     
-    fig, ax = plt.subplots(figsize=(7, 4.5))  # Reduzindo o tamanho do gráfico
-    ax.bar(x - width, tempos["Inicializacao"], width, label="Inicializacao", color='#E6A117')  # Amarelo queimado vivo
-    ax.bar(x, tempos["Com Dependencia"], width, label="Com Dependencia", color='#FF6700')  # Laranja queimado vivo
-    ax.bar(x + width, tempos["Sem Dependencia"], width, label="Sem Dependencia", color='#D40000')  # Vermelho vivo
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    ax.bar(x - width, tempos["Inicializacao"], width, label="Inicializacao", color='#E6A117')
+    ax.bar(x, tempos["Com Dependencia"], width, label="Com Dependencia", color='#FF6700')
+    ax.bar(x + width, tempos["Sem Dependencia"], width, label="Sem Dependencia", color='#D40000')
     
     ax.set_xlabel("Tamanho do Vetor")
     ax.set_ylabel("Tempo (ms)")

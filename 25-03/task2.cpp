@@ -6,7 +6,7 @@ using namespace std;
 using namespace chrono;
 
 int main() {
-    vector<int> testes = {1000, 10000, 100000, 1000000, 10000000, 1000000000, 200000000, 30000000, 400000000};
+    vector<int> testes = {300000000};
 
     for (int N : testes) {
         vector<int> vec(N);
