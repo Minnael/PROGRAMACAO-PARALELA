@@ -37,7 +37,7 @@ int main() {
         double seconds = duration / 1e9;
 
         cout << fixed << setprecision(9);
-        cout << "RESULTADO: " << nPrimos << " " << "TEMPO: " << seconds << "s" << endl;
+        cout << "NUMERO: "<< n << " RESULTADO: " << nPrimos << " " << "TEMPO: " << seconds << "s" << endl;
     }
     
     return 0;
