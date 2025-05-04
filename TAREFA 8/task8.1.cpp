@@ -1,34 +1,37 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <omp.h>
-#include <time.h>
+#include <iostream>      
+#include <omp.h>         
+#include <cstdlib>       
+#include <ctime>         
+
+using namespace std;     
 
 int main() {
-    int N = 100000000;
-    int total_in = 0;
-    double start = omp_get_wtime();
+    int N = 100000000;   // TOTAL DE PONTOS A SEREM GERADOS
+    int total_in = 0;    // CONTADOR GLOBAL DE PONTOS DENTRO DO CÍRCULO
+    double start = omp_get_wtime();  // INÍCIO DA MEDIÇÃO DE TEMPO
 
-    #pragma omp parallel
+    #pragma omp parallel   // INÍCIO DA REGIÃO PARALELA
     {
-        int in = 0;
-        unsigned int seed = time(NULL) ^ omp_get_thread_num(); // para rand_r depois
+        int local_in = 0;  // CONTADOR LOCAL PARA CADA THREAD
 
-        #pragma omp for
+        #pragma omp for    // DISTRIBUIÇÃO DO LAÇO ENTRE AS THREADS
         for (int i = 0; i < N; i++) {
-            float x = (float)rand() / RAND_MAX;
-            float y = (float)rand() / RAND_MAX;
-            if (x * x + y * y <= 1.0f)
-                in++;
+            float x = (float)rand() / RAND_MAX;  // GERA UM X ALEATÓRIO ENTRE 0 E 1
+            float y = (float)rand() / RAND_MAX;  // GERA UM Y ALEATÓRIO ENTRE 0 E 1
+            if (x * x + y * y <= 1.0f)           // VERIFICA SE O PONTO ESTÁ DENTRO DO CÍRCULO
+                local_in++;                      // INCREMENTA O CONTADOR LOCAL
         }
 
-        #pragma omp critical
+        #pragma omp critical       // SEÇÃO CRÍTICA PARA ATUALIZAR O CONTADOR GLOBAL
         {
-            total_in += in;
+            total_in += local_in;  // ACUMULA O RESULTADO DA THREAD NO TOTAL GLOBAL
         }
     }
 
-    double pi = 4.0 * total_in / N;
-    printf("PI = %f\n", pi);
-    printf("Tempo: %f segundos\n", omp_get_wtime() - start);
-    return 0;
+    double pi = 4.0 * total_in / N;     // ESTIMATIVA FINAL DE PI
+    double end = omp_get_wtime();       // FIM DA MEDIÇÃO DE TEMPO
+
+    cout << "[RAND + CRITICAL] PI = " << pi << endl;                   
+    cout << "[RAND + CRITICAL] TEMPO: " << end - start << " segundos" << endl;  
+    return 0;   
 }
