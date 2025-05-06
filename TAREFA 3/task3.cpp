@@ -8,9 +8,9 @@ using namespace chrono;
 
 // FUNÇÃO QUE CALCULA A APROXIMAÇÃO DE π USANDO A SÉRIE DE LEIBNIZ
 double calcularPiLeibniz(int iteracoes) {
-    double pi = 0.0;  
+    long double pi = 0.0;  
     for (int i = 0; i < iteracoes; i++) {
-        double termo;
+        long double termo;
         if (i % 2 == 0) {
             termo = 1.0 / (2 * i + 1);  //TERMO POSITIVO SE 'i' FOR PAR
         } else {
