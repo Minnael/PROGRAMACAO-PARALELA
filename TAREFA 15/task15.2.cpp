@@ -4,8 +4,8 @@
 
 using namespace std;
 
-const int N = 1000;
-const int NUM_STEPS = 5000;
+const int N = 100000;
+const int NUM_STEPS = 50000;
 const double ALPHA = 0.01;
 
 // TROCA NÃO BLOQUEANTE COM MPI_Isend / Irecv

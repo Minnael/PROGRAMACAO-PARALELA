@@ -2,7 +2,8 @@ import pandas as pd
 from tabulate import tabulate
 
 # Tempos de execução medidos para diferentes quantidades de threads
-tempos = [22.5334, 11.2954, 6.00608, 3.20526, 1.82054, 1.87466]
+tempos = [22.5946, 11.3268, 5.86234, 3.18854, 1.77848, 0.926311]
+
 threads = [1, 2, 4, 8, 16, 32]
 
 # Tempo da execução sequencial (com 1 thread)
@@ -57,7 +58,7 @@ plt.title('Speedup vs Threads')
 plt.xlabel('Número de Threads')
 plt.ylabel('Speedup')
 plt.xticks(threads)
-plt.grid(False)
+plt.grid(True)
 plt.legend()
 
 # Plot da Eficiência vs Threads
@@ -67,8 +68,8 @@ plt.title('Eficiência vs Threads')
 plt.xlabel('Número de Threads')
 plt.ylabel('Eficiência (%)')
 plt.xticks(threads)
-plt.ylim(35, 102)  # Limite superior um pouco acima de 100% para visualização
-plt.grid(False)
+plt.ylim(74, 102)  # Limite superior um pouco acima de 100% para visualização
+plt.grid(True)
 plt.legend()
 
 plt.tight_layout()

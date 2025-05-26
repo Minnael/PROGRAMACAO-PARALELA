@@ -4,14 +4,13 @@
 
 using namespace std;
 
-const int N = 1000;
-const int NUM_STEPS = 5000;
+const int N = 100000;
+const int NUM_STEPS = 50000;
 const double ALPHA = 0.01;
 
-// TROCA COM MPI_Test PARA SOBREPOSIÇÃO DE COMPUTAÇÃO E COMUNICAÇÃO
 void troca_bordas_overlap(vector<double>& u, vector<double>& u_novo, int rank, int size, int local_n) {
     MPI_Request reqs[4];
-    bool recv_ok[2] = {false, false};
+    int recv_ok[2] = {0, 0};
 
     // INICIA RECEBIMENTOS
     if (rank > 0)
@@ -19,7 +18,7 @@ void troca_bordas_overlap(vector<double>& u, vector<double>& u_novo, int rank, i
     if (rank < size - 1)
         MPI_Irecv(&u[local_n + 1], 1, MPI_DOUBLE, rank + 1, 0, MPI_COMM_WORLD, &reqs[1]);
 
-    // INICIA ENVIO
+    // INICIA ENVIOS
     if (rank > 0)
         MPI_Isend(&u[1], 1, MPI_DOUBLE, rank - 1, 0, MPI_COMM_WORLD, &reqs[2]);
     if (rank < size - 1)
@@ -33,12 +32,15 @@ void troca_bordas_overlap(vector<double>& u, vector<double>& u_novo, int rank, i
     if (rank > 0) while (!recv_ok[0]) MPI_Test(&reqs[0], &recv_ok[0], MPI_STATUS_IGNORE);
     if (rank < size - 1) while (!recv_ok[1]) MPI_Test(&reqs[1], &recv_ok[1], MPI_STATUS_IGNORE);
 
-    // CÁLCULO DAS BORDAS APÓS RECEBER
+    // CÁLCULO DAS BORDAS
     u_novo[1] = u[1] + ALPHA * (u[0] - 2 * u[1] + u[2]);
     u_novo[local_n] = u[local_n] + ALPHA * (u[local_n - 1] - 2 * u[local_n] + u[local_n + 1]);
 
-    // AGUARDA FIM DOS ENVIOS
-    MPI_Waitall(4, reqs, MPI_STATUSES_IGNORE);
+    // AGUARDA FIM DOS ENVIOS INDIVIDUALMENTE
+    if (rank > 0)
+        MPI_Wait(&reqs[2], MPI_STATUS_IGNORE);
+    if (rank < size - 1)
+        MPI_Wait(&reqs[3], MPI_STATUS_IGNORE);
 }
 
 int main(int argc, char** argv) {
