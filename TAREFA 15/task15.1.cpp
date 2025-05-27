@@ -5,8 +5,8 @@
 using namespace std;                 
 
 // CONSTANTES
-const int N = 100000;                  // TAMANHO TOTAL DA BARRA DE CALOR
-const int NUM_STEPS = 50000;         // NÚMERO TOTAL DE ITERAÇÕES (PASSOS DE TEMPO)
+const int N = 10000000;                  // TAMANHO TOTAL DA BARRA DE CALOR
+const int NUM_STEPS = 5000;         // NÚMERO TOTAL DE ITERAÇÕES (PASSOS DE TEMPO)
 const double ALPHA = 0.01;          // COEFICIENTE DE DIFUSÃO TÉRMICA (DEFINE A VELOCIDADE DA DIFUSÃO)
 
 // FUNÇÃO QUE TROCA OS VALORES DAS BORDAS ENTRE PROCESSOS VIZINHOS

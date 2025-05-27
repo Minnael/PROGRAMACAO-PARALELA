@@ -4,8 +4,8 @@
 
 using namespace std;
 
-const int N = 100000;
-const int NUM_STEPS = 50000;
+const int N = 10000000;
+const int NUM_STEPS = 5000;
 const double ALPHA = 0.01;
 
 // TROCA NÃO BLOQUEANTE COM MPI_Isend / Irecv
@@ -22,10 +22,10 @@ void troca_bordas_nb(vector<double>& u, int rank, int size, int local_n) {
         MPI_Isend(&u[local_n], 1, MPI_DOUBLE, rank + 1, 1, MPI_COMM_WORLD, &reqs[3]);
 
     // ESPERA ATÉ QUE TODAS AS COMUNICAÇÕES SEJAM COMPLETADAS
-    if (rank > 0) MPI_Wait(&reqs[0], MPI_STATUS_IGNORE);
-    if (rank < size - 1) MPI_Wait(&reqs[1], MPI_STATUS_IGNORE);
-    if (rank > 0) MPI_Wait(&reqs[2], MPI_STATUS_IGNORE);
-    if (rank < size - 1) MPI_Wait(&reqs[3], MPI_STATUS_IGNORE);
+    if (rank > 0) MPI_Wait(&reqs[0], MPI_STATUS_IGNORE);  // ESPERA FINALIZAÇÃO DA RECEPÇÃO À ESQUERDA
+    if (rank < size - 1) MPI_Wait(&reqs[1], MPI_STATUS_IGNORE);  // ESPERA FINALIZAÇÃO DA RECEPÇÃO À DIREITA
+    if (rank > 0) MPI_Wait(&reqs[2], MPI_STATUS_IGNORE);  // ESPERA FINALIZAÇÃO DO ENVIO À ESQUERDA
+    if (rank < size - 1) MPI_Wait(&reqs[3], MPI_STATUS_IGNORE);  // ESPERA FINALIZAÇÃO DO ENVIO À DIREITA
 }
 
 int main(int argc, char** argv) {
