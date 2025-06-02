@@ -1,30 +1,27 @@
 /*
-** PROGRAM: heat equation solve
+** PROGRAMA: SOLUÇÃO DA EQUAÇÃO DO CALOR
 **
-** PURPOSE: This program will explore use of an explicit
-**          finite difference method to solve the heat
-**          equation under a method of manufactured solution (MMS)
-**          scheme. The solution has been set to be a simple 
-**          function based on exponentials and trig functions.
+** OBJETIVO: ESTE PROGRAMA EXPLORA O USO DE UM MÉTODO EXPLÍCITO
+**           DE DIFERENÇAS FINITAS PARA RESOLVER A EQUAÇÃO DO CALOR
+**           UTILIZANDO UM MÉTODO DE SOLUÇÃO MANUFATURADA (MMS).
+**           A SOLUÇÃO É UMA FUNÇÃO SIMPLES BASEADA EM EXPONENCIAIS E FUNÇÕES TRIGONOMÉTRICAS.
 **
-**          A finite difference scheme is used on a 1000x1000 cube.
-**          A total of 0.5 units of time are simulated.
+**           O ESQUEMA É APLICADO EM UMA MALHA 1000x1000.
+**           SIMULA UM TEMPO TOTAL DE 0.5 UNIDADES.
 **
-**          The MMS solution has been adapted from
-**          G.W. Recktenwald (2011). Finite difference approximations
-**          to the Heat Equation. Portland State University.
-**
-**
-** USAGE:   Run with two arguments:
-**          First is the number of cells.
-**          Second is the number of timesteps.
-**
-**          For example, with 100x100 cells and 10 steps:
-**
-**          ./heat 100 10
+**           A SOLUÇÃO MMS FOI ADAPTADA DE:
+**           G.W. RECKTENWALD (2011). FINITE DIFFERENCE APPROXIMATIONS TO THE HEAT EQUATION.
+**           PORTLAND STATE UNIVERSITY.
 **
 **
-** HISTORY: Written by Tom Deakin, Oct 2018
+** USO: EXECUTAR COM DOIS ARGUMENTOS:
+**      PRIMEIRO É O NÚMERO DE CÉLULAS.
+**      SEGUNDO É O NÚMERO DE PASSOS DE TEMPO.
+**
+**      EXEMPLO: ./heat 100 10
+**
+**
+** HISTÓRICO: ESCRITO POR TOM DEAKIN, OUTUBRO DE 2018
 **
 */
 
@@ -32,44 +29,41 @@
 #include <stdio.h>
 #include <math.h>
 
-#include <omp.h>
+#include <omp.h>  // INCLUSÃO DA BIBLIOTECA OPENMP PARA PARALELISMO
 
-// Key constants used in this program
-#define PI acos(-1.0) // Pi
-#define LINE "--------------------\n" // A line for fancy output
+// CONSTANTES CHAVE USADAS NO PROGRAMA
+#define PI acos(-1.0) // PI DEFINIDO USANDO ARCO COSSENO
+#define LINE "--------------------\n" // LINHA PARA FORMATAÇÃO DE SAÍDA
 
-// Function definitions
+// DECLARAÇÃO DAS FUNÇÕES USADAS NO PROGRAMA
 void initial_value(const int n, const double dx, const double length, double * restrict u);
 void zero(const int n, double * restrict u);
 void solve(const int n, const double alpha, const double dx, const double dt, const double * restrict u, double * restrict u_tmp);
 double solution(const double t, const double x, const double y, const double alpha, const double length);
 double l2norm(const int n, const double * restrict u, const int nsteps, const double dt, const double alpha, const double dx, const double length);
 
-// Main function
+
+// FUNÇÃO PRINCIPAL
 int main(int argc, char *argv[]) {
 
-  // Start the total program runtime timer
+  // INÍCIO DA CONTAGEM DE TEMPO TOTAL DO PROGRAMA (PARA MEDIÇÃO DE DESEMPENHO)
   double start = omp_get_wtime();
 
-  // Problem size, forms an nxn grid
+  // TAMANHO DA MALHA NXN (PADRÃO 1000)
   int n = 1000;
 
-  // Number of timesteps
+  // NÚMERO DE PASSOS DE TEMPO (PADRÃO 10)
   int nsteps = 10;
 
-
-  // Check for the correct number of arguments
-  // Print usage and exits if not correct
+  // VALIDAÇÃO DE ARGUMENTOS DE LINHA DE COMANDO
+  // SE ARGUMENTOS SÃO PASSADOS, USAR ESSES VALORES PARA N E NSTEPS
   if (argc == 3) {
-
-    // Set problem size from first argument
     n = atoi(argv[1]);
     if (n < 0) {
       fprintf(stderr, "Error: n must be positive\n");
       exit(EXIT_FAILURE);
     }
 
-    // Set number of timesteps from second argument
     nsteps = atoi(argv[2]);
     if (nsteps < 0) {
       fprintf(stderr, "Error: nsteps must be positive\n");
@@ -77,20 +71,16 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  // DEFINIÇÕES DE PARÂMETROS DO PROBLEMA
+  double alpha = 0.1;          // COEFICIENTE DA EQUAÇÃO DO CALOR
+  double length = 1000.0;      // TAMANHO FÍSICO DO DOMÍNIO (QUADRADO LENGTH X LENGTH)
+  double dx = length / (n+1);  // TAMANHO DE CADA CÉLULA (ADICIONA +1 PARA EXCLUIR FRONTEIRAS FIXAS)
+  double dt = 0.5 / nsteps;    // INTERVALO DE TEMPO (TEMPO TOTAL 0.5s DIVIDIDO PELOS PASSOS)
 
-  //
-  // Set problem definition
-  //
-  double alpha = 0.1;          // heat equation coefficient
-  double length = 1000.0;      // physical size of domain: length x length square
-  double dx = length / (n+1);  // physical size of each cell (+1 as don't simulate boundaries as they are given)
-  double dt = 0.5 / nsteps;    // time interval (total time of 0.5s)
-
-
-  // Stability requires that dt/(dx^2) <= 0.5,
+  // PARÂMETRO DE ESTABILIDADE R = ALPHA*DT/ (DX^2)
   double r = alpha * dt / (dx * dx);
 
-  // Print message detailing runtime configuration
+  // IMPRESSÃO DAS CONFIGURAÇÕES DE EXECUÇÃO
   printf("\n");
   printf(" MMS heat equation\n\n");
   printf(LINE);
@@ -106,90 +96,94 @@ int main(int argc, char *argv[]) {
   printf(" Time step: %E\n", dt);
   printf(LINE);
 
-  // Stability check
+  // VERIFICAÇÃO DE ESTABILIDADE DO ESQUEMA
   printf("Stability\n\n");
   printf(" r value: %lf\n", r);
   if (r > 0.5)
-    printf(" Warning: unstable\n");
+    printf(" Warning: unstable\n"); // AVISO DE INSTABILIDADE SE R > 0.5
   printf(LINE);
 
-
-  // Allocate two nxn grids
+  // ALOCAÇÃO DINÂMICA DE MEMÓRIA PARA AS MALHAS U E U_TMP (TAMANHO NXN)
   double *u     = malloc(sizeof(double)*n*n);
   double *u_tmp = malloc(sizeof(double)*n*n);
-  double *tmp;
+  double *tmp; // PONTEIRO AUXILIAR PARA TROCA DE MALHAS
 
-  // Set the initial value of the grid under the MMS scheme
+  // INICIALIZA A MALHA U COM VALORES DA SOLUÇÃO MMS
   initial_value(n, dx, length, u);
-  zero(n, u_tmp);
+  zero(n, u_tmp); // ZERA A MALHA TEMPORÁRIA
 
   //
-  // Run through timesteps under the explicit scheme
+  // USO DE DIRETIVAS OPENMP PARA GERENCIAMENTO DE MEMÓRIA NO DISPOSITIVO
   //
 
+  
+  // ALOCA EXPLICITAMENTE MEMÓRIA PARA U E U_TMP NO DISPOSITIVO (GPU)
   #pragma omp target enter data map(alloc: u[0:n*n], u_tmp[0:n*n])
-  #pragma omp target update to(u[0:n*n])
+  // COPIA OS DADOS INICIAIS DE U DO HOST PARA O DISPOSITIVO PARA EXECUÇÃO
+  #pragma omp target update to(u[0:n*n]) 
 
-  // Start the solve timer
+  // INÍCIO DA CONTAGEM DE TEMPO DO PROCESSO DE SOLUÇÃO
   double tic = omp_get_wtime();
+
   for (int t = 0; t < nsteps; ++t) {
 
-    // Call the solve kernel
-    // Computes u_tmp at the next timestep
-    // given the value of u at the current timestep
+    // CHAMA A FUNÇÃO SOLVE PARA CALCULAR O PRÓXIMO PASSO TEMPORAL NA GPU
     solve(n, alpha, dx, dt, u, u_tmp);
 
-    // Pointer swap
+    // TROCA OS PONTEIROS DAS MALHAS PARA AVANÇAR O TEMPO
     tmp = u;
     u = u_tmp;
     u_tmp = tmp;
   }
-  // Stop solve timer
+
+  // FIM DA CONTAGEM DE TEMPO DO PROCESSO DE SOLUÇÃO
   double toc = omp_get_wtime();
 
-  #pragma omp target update from(u[0:n*n])
+  // ATUALIZA OS DADOS DA MALHA U DO DISPOSITIVO PARA O HOST APÓS A EXECUÇÃO
+  #pragma omp target update from(u[0:n*n]) 
+  // LIBERA A MEMÓRIA ALOCADA NO DISPOSITIVO PARA U E U_TMP, EVITANDO VAZAMENTOS
   #pragma omp target exit data map(delete: u[0:n*n], u_tmp[0:n*n])
 
+
   //
-  // Check the L2-norm of the computed solution
-  // against the *known* solution from the MMS scheme
+  // CÁLCULO DA NORMA L2 DO ERRO ENTRE SOLUÇÃO COMPUTADA E SOLUÇÃO ANALÍTICA
   //
   double norm = l2norm(n, u, nsteps, dt, alpha, dx, length);
 
-  // Stop total timer
+  // FINALIZAÇÃO DA CONTAGEM DE TEMPO TOTAL DO PROGRAMA
   double stop = omp_get_wtime();
 
-  // Print results
+  // IMPRESSÃO DOS RESULTADOS
   printf("Results\n\n");
   printf("Error (L2norm): %E\n", norm);
   printf("Solve time (s): %lf\n", toc-tic);
   printf("Total time (s): %lf\n", stop-start);
   printf(LINE);
 
-  // Free the memory
+  // LIBERAÇÃO DA MEMÓRIA ALOCADA NO HOST
   free(u);
   free(u_tmp);
 
 }
 
 
-// Sets the mesh to an initial value, determined by the MMS scheme
+// FUNÇÃO PARA DEFINIR OS VALORES INICIAIS NA MALHA SEGUNDO A SOLUÇÃO MMS
 void initial_value(const int n, const double dx, const double length, double * restrict u) {
 
   double y = dx;
   for (int j = 0; j < n; ++j) {
-    double x = dx; // Physical x position
+    double x = dx; // POSIÇÃO FÍSICA X
     for (int i = 0; i < n; ++i) {
-      u[i+j*n] = sin(PI * x / length) * sin(PI * y / length);
+      u[i+j*n] = sin(PI * x / length) * sin(PI * y / length); // ATRIBUI FUNÇÃO SENOIDAL
       x += dx;
     }
-    y += dx; // Physical y position
+    y += dx; // POSIÇÃO FÍSICA Y
   }
 
 }
 
 
-// Zero the array u
+// FUNÇÃO PARA ZERAR TODOS OS ELEMENTOS DO VETOR U
 void zero(const int n, double * restrict u) {
 
   for (int i = 0; i < n; ++i) {
@@ -201,27 +195,30 @@ void zero(const int n, double * restrict u) {
 }
 
 
-// Compute the next timestep, given the current timestep
+// FUNÇÃO QUE EXECUTA O PASSO DE TEMPO EXPLÍCITO DA EQUAÇÃO DO CALOR
 void solve(const int n, const double alpha, const double dx, const double dt, const double * restrict u, double * restrict u_tmp) {
-    const double r = alpha * dt / (dx * dx);
-    const double r2 = 1.0 - 4.0 * r;
 
+    const double r = alpha * dt / (dx * dx); // PARÂMETRO DE ESTABILIDADE
+    const double r2 = 1.0 - 4.0 * r;        // COEFICIENTE CENTRAL NO ESQUEMA EXPLÍCITO
+
+    // DIRETIVA OPENMP PARA EXECUTAR O LOOP NESTE NÍVEL EM PARALELO NA GPU
     #pragma omp target teams distribute parallel for collapse(2) \
         map(to: u[0:n*n]) map(from: u_tmp[0:n*n]) \
         firstprivate(n, r, r2)
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
+            // CÁLCULO DO VALOR DA MALHA NA PRÓXIMA ITERAÇÃO TEMPORAL
             u_tmp[i + j * n] = r2 * u[i + j * n]
-                             + r * ((i < n - 1) ? u[i + 1 + j * n] : 0.0)
-                             + r * ((i > 0)     ? u[i - 1 + j * n] : 0.0)
-                             + r * ((j < n - 1) ? u[i + (j + 1) * n] : 0.0)
-                             + r * ((j > 0)     ? u[i + (j - 1) * n] : 0.0);
+                             + r * ((i < n - 1) ? u[i + 1 + j * n] : 0.0)    // VALOR AO LADO DIREITO, SE NÃO FRONTEIRA
+                             + r * ((i > 0)     ? u[i - 1 + j * n] : 0.0)    // VALOR AO LADO ESQUERDO, SE NÃO FRONTEIRA
+                             + r * ((j < n - 1) ? u[i + (j + 1) * n] : 0.0)  // VALOR ACIMA, SE NÃO FRONTEIRA
+                             + r * ((j > 0)     ? u[i + (j - 1) * n] : 0.0); // VALOR ABAIXO, SE NÃO FRONTEIRA
         }
     }
 }
 
 
-// True answer given by the manufactured solution
+// FUNÇÃO QUE RETORNA A SOLUÇÃO ANALÍTICA PARA UM PONTO (X,Y) E TEMPO T
 double solution(const double t, const double x, const double y, const double alpha, const double length) {
 
   return exp(-2.0*alpha*PI*PI*t/(length*length)) * sin(PI*x/length) * sin(PI*y/length);
@@ -229,23 +226,24 @@ double solution(const double t, const double x, const double y, const double alp
 }
 
 
-// Computes the L2-norm of the computed grid and the MMS known solution
-// The known solution is the same as the boundary function.
+// FUNÇÃO QUE CALCULA A NORMA L2 DO ERRO ENTRE A SOLUÇÃO COMPUTADA E A SOLUÇÃO ANALÍTICA
 double l2norm(const int n, const double * restrict u, const int nsteps, const double dt, const double alpha, const double dx, const double length) {
-    double time = dt * (double)nsteps;
-    double norm = 0.0;
 
+    double time = dt * (double)nsteps; // TEMPO FINAL DA SIMULAÇÃO
+    double norm = 0.0;                 // VARIÁVEL PARA ACUMULAR O SOMATÓRIO
+
+    // DIRETIVA OPENMP PARA PARALELIZAR O CÁLCULO DO SOMATÓRIO NA GPU
     #pragma omp target teams distribute parallel for collapse(2) reduction(+:norm) \
         map(to: u[0:n*n]) firstprivate(n, dx, length, alpha, time)
     for (int j = 0; j < n; ++j) {
         for (int i = 0; i < n; ++i) {
             double x = dx * (i + 1);
             double y = dx * (j + 1);
-            double exact = solution(time, x, y, alpha, length);
-            double diff = u[i + j * n] - exact;
-            norm += diff * diff;
+            double exact = solution(time, x, y, alpha, length); // VALOR EXATO DA SOLUÇÃO
+            double diff = u[i + j * n] - exact;                 // DIFERENÇA ENTRE SOLUÇÃO NUMÉRICA E ANALÍTICA
+            norm += diff * diff;                                // ACUMULA O QUADRADO DA DIFERENÇA
         }
     }
 
-    return sqrt(norm);
+    return sqrt(norm); // RETORNA A RAIZ QUADRADA DO SOMATÓRIO (NORMA L2)
 }

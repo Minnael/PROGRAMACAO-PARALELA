@@ -41,7 +41,7 @@ void salvar_csv(const Grid& u, int passo) {
 
 // FUNÇÃO PARA CALCULAR UM PASSO DE TEMPO USANDO A DIFUSÃO (LAPLACIANO)
 void passo_temporal(const Grid& u, Grid& u_new) {
-    #pragma omp parallel for collapse(2) schedule(static) // PARALELIZAÇÃO COM OPENMP: COLLAPSE DE 2 LAÇOS, SCHEDULE ESTÁTICO
+    #pragma omp parallel for collapse(2) schedule(static) // PARALELIZAÇÃO COM OPENMP
     for (int i = 1; i < NX - 1; i++) {                                        // LOOP SOBRE X, EVITANDO AS BORDAS
         for (int j = 1; j < NY - 1; j++) {                                    // LOOP SOBRE Y, EVITANDO AS BORDAS
             u_new[i][j] = u[i][j] + NU * DT * (
@@ -54,7 +54,7 @@ void passo_temporal(const Grid& u, Grid& u_new) {
 
 // FUNÇÃO PARA COPIAR OS VALORES DE u_new PARA u
 void atualizar(Grid& u, const Grid& u_new) {
-    #pragma omp parallel for collapse(2) schedule(static) // PARALELIZAÇÃO COM OPENMP: COLLAPSE DE 2 LAÇOS, SCHEDULE ESTÁTICO
+    #pragma omp parallel for collapse(2) schedule(static) // PARALELIZAÇÃO COM OPENMP
     for (int i = 1; i < NX - 1; i++)              // LOOP SOBRE X, EXCLUINDO AS BORDAS
         for (int j = 1; j < NY - 1; j++)          // LOOP SOBRE Y, EXCLUINDO AS BORDAS
             u[i][j] = u_new[i][j];                // ATUALIZA O VALOR DE u COM O NOVO CÁLCULO

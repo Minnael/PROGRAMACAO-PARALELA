@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 
 # Dados
 processes = [2, 4, 8, 16, 32]
-times = [0.0940474, 0.0534772, 0.0439966, 0.0184532, 0.0120588]
+times = [0.105585, 0.0632338, 0.0359643, 0.0299001, 0.0359585]
 
 plt.figure(figsize=(10,6))
 plt.plot(processes, times, marker='o', linestyle='-', color='red')
