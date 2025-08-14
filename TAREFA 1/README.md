@@ -1,154 +1,91 @@
-<img src="./ms2ex21g.png"
-style="width:2.07292in;height:0.85417in" />
 
-> UNIVERSIDADE FEDERAL DO RIO GRANDE DO NORTE DEPARTAMENTO DE ENGENHARIA
-> DE COMPUTAÇÃO E AUTOMAÇÃO DCA3703 - PROGRAMAÇÃO PARALELA
->
-> **MEMÓRIA** **CACHE**
->
-> DISCENTE: MINNAEL CAMPELO DE OLIVEIRA
->
-> DOCENTE: SAMUEL XAVIER DE SOUZA
->
-> NATAL/RN
->
-> 2025
 
-**1.** **PROBLEMÁTICA**
+<p align="center">
+	<img src="./ms2ex21g.png" width="200" />
+</p>
 
-A eficiência da multiplicação de matriz por vetor (MxV) é diretamente
-influenciada pelo padrão de acesso à memória, especialmente devido à
-hierarquia de cache dos processadores modernos. Dependendo de como os
-elementos da matriz são acessados — linha por linha ou coluna por coluna
-— o tempo de execução pode variar significativamente.
+<h3 align="center">UNIVERSIDADE FEDERAL DO RIO GRANDE DO NORTE</h3>
+<h4 align="center">DEPARTAMENTO DE ENGENHARIA DE COMPUTAÇÃO E AUTOMAÇÃO</h4>
+<h4 align="center">DCA3703 - PROGRAMAÇÃO PARALELA</h4>
 
-Este estudo investiga duas abordagens para a multiplicação MxV:
+<h2 align="center">ANÁLISE DE DESEMPENHO: MULTIPLICAÇÃO MATRIZ-VETOR E CACHE</h2>
 
-> 1\. **Acesso** **por** **Linhas**: a matriz é percorrida linha por
-> linha (linha externa, coluna interna).
->
-> 2\. **Acesso** **por** **Colunas**: a matriz é percorrida coluna por
-> coluna (coluna externa, linha interna).
+<p align="center">
+	<strong>Discente:</strong> Minnael Campelo de Oliveira<br>
+	<strong>Docente:</strong> Samuel Xavier de Souza<br>
+	Natal/RN<br>
+	2025
+</p>
 
-Espera-se que o acesso por linhas seja mais eficiente devido à
-**localidade** **espacial**, pois os elementos armazenados
-sequencialmente na memória são carregados em blocos para a cache. Já o
-acesso por colunas pode resultar em acessos menos eficientes, pois
-envolve saltos na memória que podem aumentar as falhas de cache e,
-consequentemente, o tempo de execução.
+---
 
-O objetivo deste experimento é identificar a partir de que tamanho de
-matriz ocorre uma diferença significativa de desempenho entre os dois
-métodos e relacionar essa diferença com os princípios de funcionamento
-da cache, analisando como a organização da memória afeta a eficiência
-computacional.
+## Objetivo
 
-**2.** **DESENVOLVIMENTO**
+Este projeto tem como objetivo analisar o impacto do padrão de acesso à memória na multiplicação de matriz por vetor (MxV) em C++, comparando o desempenho entre o acesso por linhas e por colunas, e relacionando os resultados com o funcionamento da memória cache dos processadores modernos.
 
-**2.1.** **LINGUAGENS** **E** **BIBLIOTECAS**
+## Descrição do Problema
 
-O código foi implementado em **C++**, uma linguagem de programação
-amplamente utilizada em tarefas que exigem alto desempenho e controle
-sobre os recursos de hardware. Sua eficiência na manipulação de memória
-e otimização de tempo de execução torna-a uma escolha ideal para
-operações matemáticas intensivas, como a multiplicação de matrizes. O
-C++ permite uma maior flexibilidade no gerenciamento de memória,
-essencial para este tipo de análise, onde o acesso eficiente à memória
-pode impactar significativamente o desempenho.
+A multiplicação de matriz por vetor é uma operação fundamental em computação científica e aplicações de alto desempenho. O tempo de execução dessa operação pode variar significativamente dependendo de como os dados são acessados na memória, devido à hierarquia de cache dos processadores.
 
-O código desenvolvido visa realizar a multiplicação de uma matriz por um
-vetor de duas formas distintas, com o objetivo de medir o impacto do
-padrão de acesso à memória no tempo de execução. O código foi
-implementado em **C++** utilizando a biblioteca \<chrono\> para medir o
-tempo de execução, e a estrutura de dados \<vector\> foi escolhida para
-armazenar tanto a matriz quanto o vetor.
+São comparadas duas abordagens:
 
-**2.2** **ESTRUTURA** **PRINCIPAL** **DO** **CÓDIGO**
+- **Acesso por Linhas:** Percorre a matriz linha por linha (linha externa, coluna interna).
+- **Acesso por Colunas:** Percorre a matriz coluna por coluna (coluna externa, linha interna).
 
-O código segue estruturado nas seguintes partes fundamentais: Definição
-e Inicialização de Dados, Multiplicação da Matriz pelo Vetor, Cálculo do
-Tempo de Execução. No entanto, para uma melhor avaliação o código
-completo está disponível no
-<u>[**GITHUB**](https://github.com/Minnael/PROGRAMACAO-PARALELA/tree/master/20-03).</u>
+O acesso por linhas tende a ser mais eficiente devido à localidade espacial, pois os elementos sequenciais são carregados em blocos para a cache. O acesso por colunas pode causar mais falhas de cache, aumentando o tempo de execução.
 
-**2.2.1.** **DEFINIÇÃO** **E** **INICIALIZAÇÃO** **DE**
-**DADOS**<img src="./gubvm2cf.png"
-style="width:5.09375in;height:1.375in" /><img src="./sf2zemt3.png"
-style="width:6.69792in;height:1.04167in" />
+## Metodologia
 
-A primeira parte do código se dedica a configurar o vetor e a matriz,
-ambos de tamanhos variáveis, de acordo com os valores definidos no vetor
-testes. Este vetor contém os tamanhos das matrizes que serão testadas,
-variando de 100 a 1200 elementos em incrementos de 100.
+O código foi implementado em **C++**, utilizando as bibliotecas `<vector>` para estrutura de dados e `<chrono>` para medição precisa do tempo de execução. Foram realizados testes com matrizes quadradas de tamanhos variados (de 100 a 1200 elementos), preenchidas com valores fixos para garantir consistência nos resultados.
 
-Para cada valor presente em testes, o código gera uma matriz quadrada de
-tamanho NxN, onde N é o valor do teste atual. A matriz é preenchida com
-valores fixos (100, no caso), assim como o vetor. A alocação de memória
-é feita utilizando o tipo vector\<int\> para o vetor e
-vector\<vector\<int\>\> para a matriz.
+### Estrutura do Código
 
-**2.2.2.** **MULTIPLICAÇÃO** **DA** **MATRIZ** **PELO** **VETOR**
+O projeto está dividido em duas versões principais:
 
-O cálculo da multiplicação é feito dentro da função
-multiplicadorMatrizes(). Nessa função, a multiplicação é implementada de
-duas maneiras, controladas pelo parâmetro variante:
+- `matrixvector.cpp`: Implementa a multiplicação de matriz por vetor, medindo o tempo de execução para os dois padrões de acesso (linhas e colunas), além de calcular o espaço ocupado na memória.
+- `tarefa01.cpp`: Realiza testes de desempenho para diferentes tamanhos de matrizes, comparando os tempos de execução entre os dois métodos e apresentando os resultados.
 
-> ● **Acesso** **por** **Linhas** **(Linha** **Externa,** **Coluna**
-> **Interna)**: Neste padrão, as linhas da matriz são percorridas
-> primeiro, e para cada linha, percorre-se a coluna correspondente.
->
-> ● **Acesso** **por** **Colunas** **(Coluna** **Externa,** **Linha**
-> **Interna)**: Nesse padrão, as colunas são percorridas primeiro, o que
-> pode resultar em um acesso menos eficiente devido ao layout de
-> memória.
->
-> Figura 01 - Multiplicação por linhas.
+Funções principais:
 
-A escolha entre um acesso ou outro é feita através da variável variante,
-que é passada como argumento para a função. Se a variante for falsa, a
-multiplicação é feita com acesso por linhas. Caso contrário, o acesso é
-feito por colunas.
+- `multiplicadorMatrizes`: Realiza a multiplicação MxV, alternando entre acesso por linhas e por colunas conforme o parâmetro.
+- `matrizTransposta`: Gera a matriz transposta para facilitar o teste de acesso por colunas.
+- Medição do tempo de execução usando `high_resolution_clock`.
 
-**3.** **CÁLCULO** **DO** **TEMPO** **DE** **EXECUÇÃO**
+### Inicialização dos Dados
 
-O tempo de execução de cada versão da multiplicação (por linhas e por
-colunas) é medido com a ajuda da biblioteca \<chrono\>. O
-high_resolution_clock::now() é utilizado para capturar o momento de
-início e de término de cada operação, e a diferença entre esses tempos é
-convertida para **nanosegundos**.
+<p align="center">
+	<img src="./gubvm2cf.png" width="400" />
+	<img src="./sf2zemt3.png" width="500" />
+</p>
 
-> Figura 02 - Medição do tempo de execução de uma determinada
-> multiplicação.
+Os vetores e matrizes são inicializados com valores fixos (100) para garantir uniformidade nos testes. O vetor de testes define os tamanhos das matrizes a serem avaliadas.
 
-**3.** **CONCLUSÃO**<img src="./fwmvegz4.png"
-style="width:6.22917in;height:3.71875in" />
+## Resultados
 
-**3.1** **RESULTADOS** **ESPERADOS**
+O tempo de execução de cada abordagem é medido em nanosegundos ou milissegundos, dependendo do teste. Os resultados mostram que o acesso por linhas é mais eficiente, especialmente para matrizes maiores, devido à melhor utilização da cache.
 
-Com base na explicação do que foi pedido, espera-se que o tempo de
-execução da multiplicação de matriz por vetor seja mais eficiente para o
-caso de acesso por linhas, devido à melhor utilização da localidade
-espacial da memória. Em contrastes, o acesso por colunas pode resultar
-em maior número de falhas de cache e, portanto, maior tempo de execução.
+<p align="center">
+	<img src="./fwmvegz4.png" width="600" />
+</p>
 
-**3.2** **ANÁLISE** **DE** **DESEMPENHO**
+O gráfico acima ilustra a diferença de desempenho entre os métodos, evidenciando o impacto do padrão de acesso à memória.
 
-O desempenho do código foi analisado observando os tempos de execução
-para diferentes tamanhos de matrizes. Espera-se que, à medida que o
-tamanho da matriz aumenta, as diferenças entre os dois tipos de acesso
-se tornem mais evidentes, especialmente em matrizes maiores, quando as
-falhas de cache se tornam mais frequentes. A análise gráfica dessas
-medições segue abaixo e permite identificar em que ponto o desempenho se
-desvia significativamente entre as duas abordagens.
+## Conclusão
 
-> Figura 03 - Gráfico responsável pela comparação de acesso.
+Os experimentos confirmam que o padrão de acesso à memória influencia diretamente o desempenho da multiplicação de matriz por vetor. O acesso por linhas, por aproveitar melhor a localidade espacial, resulta em menos falhas de cache e maior eficiência, especialmente em matrizes grandes. O acesso por colunas, por outro lado, é penalizado pelo layout de memória, tornando-se menos eficiente.
 
-Em conclusão, os resultados obtidos por meio das medições de tempo de
-execução, apresentados no gráfico gerado em Python, confirmaram as
-expectativas iniciais. O gráfico evidenciou que o acesso por linhas,
-devido à melhor utilização da localidade espacial da memória, resultou
-em tempos de execução mais rápidos em comparação com o acesso por
-colunas, especialmente conforme o tamanho da matriz aumentou. Esses
-resultados validam a teoria de que o padrão de acesso à memória tem um
-impacto significativo no desempenho, especialmente em operações com
-grandes matrizes, corroborando a análise teórica realizada.
+## Código-Fonte
+
+O código completo está disponível em:
+
+<p align="center">
+	<a href="https://github.com/Minnael/PROGRAMACAO-PARALELA/tree/master/TAREFA%201"><strong>Repositório GitHub</strong></a>
+</p>
+
+---
+
+<p align="center">
+	<strong>Universidade Federal do Rio Grande do Norte</strong><br>
+	<strong>Departamento de Engenharia de Computação e Automação</strong><br>
+	<strong>DCA3703 - Programação Paralela</strong>
+</p>
